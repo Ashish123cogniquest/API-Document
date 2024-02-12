@@ -1,0 +1,49 @@
+def call_proc(DB_CONNECTION_STR, args, procName, out_ind_st, out_ind_en):
+    conn, cur = get_connection(DB_CONNECTION_STR)
+    results_ar = cur.callproc(procName, args)
+    return results_ar[out_ind_st:out_ind_en]
+    select_outs = []
+    for ind in range(out_ind_st, out_ind_en):
+        select_outs.append('@_%s_%s' %(procName, str(ind)))
+    results = []
+    while cur.nextset():
+        results.append(cur.fetchall())
+    cur.execute('SELECT %s' %','.join(select_outs))
+    res = cur.fetchone()
+    cur.close()
+    conn.close()
+    return res
+
+def getPCode(DB_CONNECTION_STR, uid):
+    conn, cur = get_connection(DB_CONNECTION_STR)
+    sql = "select emailCode from users where id=%s"
+    cur.execute(sql %uid)
+    res = cur.fetchone()
+    cur.close()
+    conn.close()
+    if res:
+       return res[0]
+    return ''
+
+def getFullName(DB_CONNECTION_STR, uid):
+    conn, cur = get_connection(DB_CONNECTION_STR)
+    sql = "select full_name from users where id=%s"
+    cur.execute(sql %uid)
+    res = cur.fetchone()
+    cur.close()
+    conn.close()
+    if res:
+       return res[0]
+    return ''
+
+def get_user_role(dbstring, uid):
+    conn, cur = get_connection(dbstring)
+    sql = "SELECT user_role FROM users WHERE id = %s"
+    cur.execute(sql%uid)
+    res = cur.fetchall()
+    cur.close()
+    conn.close()
+    if res:
+        return res[0]
+    else:
+        return 'user'
