@@ -1,16 +1,15 @@
-class customerUsageDetails(MethodView):
+class SignIn(MethodView):
     def get(self):
         """ Responds to GET requests """
-        return "Responding to a GET request"
-    @token_required
+        return "Responding to a GET request = "
+
     def post(self):
         data_dict = request.get_json()
         if 1:#try:
-            def_dict = api31.customerUsageDetails(data_dict)
-            #def_dict = asyncio.get_event_loop().run_until_complete(api31.customerUsageDetails(data_dict))
-        return jsonify(def_dict)
-        #except:
-       #   def_dict = {'p_code': '', 'p_status': 'API Error', 'uid': ''}
-        #   return jsonify(def_dict)
+            def_dict = api_methods.sign_in(data_dict)
+            if def_dict.get("p_status", "")=="User successfully logged in":
+               token = jwt.encode({'user' : def_dict['email'], 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=500)}, app.config['SECRET_KEY'])
+               def_dict['jwt_token'] = token
+            return jsonify(def_dict)
 
-app.add_url_rule("/cqICCOpApi/customerUsageDetails", view_func=customerUsageDetails.as_view("customerUsageDetails"))
+app.add_url_rule("/cqICCOpApi/SignIn", view_func=SignIn.as_view("SignIn"))
